@@ -1,0 +1,16 @@
+{
+  "name": "spacebot",
+  "description": "bot in discord",
+  "version": "3.0.0",
+  "author": "zziger",
+  "scripts": {
+    "start": "node ."
+  },
+  "private": true,
+  "repository": "https://github.com/zziger/SpaceBot",
+  "dependencies": {
+    "discord.js": "latest",
+    "request": "latest",
+    "socket.io": "latest"
+  }
+}
