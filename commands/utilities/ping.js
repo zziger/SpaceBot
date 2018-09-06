@@ -1,9 +1,14 @@
 module.exports.info = {
-    'name': 'ping',
-    'description': 'Узнать пинг API сервера',
-    'regex': '(p[ieo]ng|п[иео]н[гх])'
+    name: 'ping',
+    description: 'Узнать пинг API сервера Discord',
+    regex: '(p[ieo]ng|п[иео]н[гх])',
+    args: []
 };
 
-module.exports.run = (message) => {
-    Bot.Response.info(message.channel, 'Пинг API сервера', `Пинг API сервера - ${Bot.client.ping}мс`);
+module.exports.run = function (message) {
+    let embed = new Bot.Discord.RichEmbed()
+        .setTitle('🏓 Понг!')
+        .setDescription(`Пинг API сервера Discord - **${Math.round(Bot.client.ping)}**мс.`)
+        .setColor('RANDOM');
+    message.reply(embed);
 };
