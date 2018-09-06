@@ -9,35 +9,6 @@ let fs = require('fs');
  */
 class Bot {
     /**
-     * Bot constructor.
-     */
-    constructor() {
-        this.client = new Discord.Client();
-        this.categories = [];
-        this.commands = {};
-        console.info(`Connecting...`);
-        this.client.login(process.env.TOKEN).catch(console.error);
-        delete process.env.TOKEN;
-        this.client.on('ready', this.init);
-    }
-
-    init() {
-        let _this = this;
-        console.info(`Connected successfully`);
-        this._Utilities = require(`./classes/Utilities.js`);
-        this.Utilities = new this._Utilities();
-        this._Response = require(`./classes/Utilities.js`);
-        this.Response = new this._Response();
-        this.registerCommands(() => {
-            console.info('Commands registered');
-            _this.registerEvents(() => {
-                console.info('Events registered');
-                _this.client.on('message', _this.onMessage);
-            })
-        });
-    }
-
-    /**
      * @param {Object} message
      */
     onMessage(message) {
@@ -98,6 +69,35 @@ class Bot {
                 });
             });
         })
+    }
+
+    /**
+     * Bot constructor.
+     */
+    constructor() {
+        this.client = new Discord.Client();
+        this.categories = [];
+        this.commands = {};
+        console.info(`Connecting...`);
+        this.client.login(process.env.TOKEN).catch(console.error);
+        delete process.env.TOKEN;
+        this.client.on('ready', this.init);
+    }
+
+    init() {
+        let _this = this;
+        console.info(`Connected successfully`);
+        this._Utilities = require(`./classes/Utilities.js`);
+        this.Utilities = new this._Utilities();
+        this._Response = require(`./classes/Utilities.js`);
+        this.Response = new this._Response();
+        this.registerCommands(() => {
+            console.info('Commands registered');
+            _this.registerEvents(() => {
+                console.info('Events registered');
+                _this.client.on('message', _this.onMessage);
+            })
+        });
     }
 }
 
