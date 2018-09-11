@@ -10,7 +10,10 @@
   "repository": "https://github.com/zziger/SpaceBot",
   "dependencies": {
     "discord.js": "latest",
+    "each": "^1.2.0",
+    "mysql": "^2.16.0",
     "request": "latest",
-    "socket.io": "latest"
+    "socket.io": "latest",
+    "sync-each": "^1.0.1"
   }
 }
