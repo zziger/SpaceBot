@@ -26,6 +26,7 @@ module.exports = class Response {
         channel.send(embed).catch(console.error);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * @param {Object} channel
      * @param {String} header

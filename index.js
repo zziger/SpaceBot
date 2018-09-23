@@ -1,7 +1,6 @@
 let Discord = require('discord.js');
 let fs = require('fs');
 let mysql = require('mysql');
-let each = require('sync-each');
 
 /**
  * Main class.
@@ -21,6 +20,8 @@ class Bot {
         this.categories = [];
         this.commands = {};
         this.prefix = '.';
+        this.guild = '417266233562365952';
+        this.xpClaimed = new Set();
         console.info(`Connecting...`);
         this.client.login(process.env.TOKEN).catch(console.error);
         delete process.env.TOKEN;
@@ -33,6 +34,16 @@ class Bot {
                 _this.init();
             })
         });
+
+        this.connection.on('error', function (err) {
+            if (err.code !== 'ECONNRESET') {
+                throw err
+            }
+        });
+
+        setInterval(() => {
+            this.connection = this.mysql.createConnection(JSON.parse(process.env.MYSQL));
+        }, 15*6e4);
     }
 
 
@@ -48,55 +59,71 @@ class Bot {
         this.User = require(`./classes/User.js`);
         console.log('Updating database...');
 
-        this.connection.query(`SELECT * FROM users`, (err, res) => {
-            let res1 = res.map(obj => obj.id);
-            each(this.client.guilds.get('417266233562365952').members.keyArray(),
-                (key, next) => {
-                    function next0() {
-                        function next1() {
-                            let roles = _this.client.guilds.get('417266233562365952').members.get(key).roles.keyArray();
-                            delete roles[_this.client.guilds.get('417266233562365952').roles.find((r) => r.name === '@everyone')];
-                            if (res.filter(obj => obj.id === key)[0] && res.filter(obj => obj.id === key)[0].roles !== JSON.stringify(_this.client.guilds.get('417266233562365952').members.get(key).roles.keyArray())) _this.connection.query(`UPDATE \`users\` SET \`roles\` = '${JSON.stringify(_this.client.guilds.get('417266233562365952').members.get(key).roles.keyArray())}' WHERE \`users\`.\`id\` = '${key}'`, (err) => {
-                                if (err) throw err;
-                                next();
-                            });
-                            else next();
-                        }
-                        if (res.filter(obj => obj.id === key)[0] && !res.filter(obj => obj.id === key)[0].member) _this.connection.query(`UPDATE \`users\` SET \`member\` = '1' WHERE \`users\`.\`id\` = '${key}'`, (err) => {if (err) throw err; next1()});
-                        else next1();
-                    }
-                    if (!res1.includes(key)) return this.connection.query(`INSERT INTO \`users\` (\`id\`, \`balance\`, \`balance_real\`, \`level\`, \`xp\`, \`noxp\`, \`member\`, \`roles\`) VALUES ('${key}', '250', '0', '0', '0', '0', '1', '${JSON.stringify(_this.client.guilds.get('417266233562365952').members.get(key).roles.keyArray())}')`, (err) => {
-                        if (err) console.error(err);
-                        next0();
-                    });
-                    else next0();
-                },
-                () => {
-                    each(
-                        res1,
-                        (id, next) => {
-                            if (!_this.client.guilds.get('417266233562365952').members.get(id)) _this.connection.query(`UPDATE \`users\` SET \`member\` = '0' WHERE \`users\`.\`id\` = '${id}'`, (err) => {if (err) throw err; next()});
-                            else next();
-                        },
-                        () => {
-                            _this.registerCommands(() => {
-                                console.info('Commands registered');
-                                _this.registerEvents(() => {
-                                    console.info('Events registered');
-                                    _this.client.on('message', (message) => _this.onMessage(message));
-                                })
-                            });
-                        }
-                    )
-                });
+        //     let res1 = res.map(obj => obj.id);
+        //     each(this.client.guilds.get(_this.guild).members.keyArray(),
+        //         (key, next) => {
+        //             function next0() {
+        //                 function next1() {
+        //                     let roles = _this.client.guilds.get(_this.guild).members.get(key).roles.keyArray();
+        //                     delete roles[_this.client.guilds.get(_this.guild).roles.find((r) => r.name === '@everyone')];
+        //                     if (res.filter(obj => obj.id === key)[0] && res.filter(obj => obj.id === key)[0].roles !== JSON.stringify(_this.client.guilds.get(_this.guild).members.get(key).roles.keyArray())) _this.connection.query(`UPDATE \`users\` SET \`roles\` = '${JSON.stringify(_this.client.guilds.get(_this.guild).members.get(key).roles.keyArray())}' WHERE \`users\`.\`id\` = '${key}'`, (err) => {
+        //                         if (err) throw err;
+        //                         next();
+        //                     });
+        //                     else next();
+        //                 }
+        //                 if (res.filter(obj => obj.id === key)[0] && !res.filter(obj => obj.id === key)[0].member) _this.connection.query(`UPDATE \`users\` SET \`member\` = '1' WHERE \`users\`.\`id\` = '${key}'`, (err) => {if (err) throw err; next1()});
+        //                 else next1();
+        //             }
+        //             if (!res1.includes(key)) return this.connection.query(`INSERT INTO \`users\` (\`id\`, \`balance\`, \`balance_real\`, \`level\`, \`xp\`, \`noxp\`, \`member\`, \`roles\`) VALUES ('${key}', '250', '0', '0', '0', '0', '1', '${JSON.stringify(_this.client.guilds.get(_this.guild).members.get(key).roles.keyArray())}')`, (err) => {
+        //                 if (err) console.error(err);
+        //                 next0();
+        //             });
+        //             else next0();
+        //         },
+        //         () => {
+        //             each(
+        //                 res1,
+        //                 (id, next) => {
+        //                     if (!_this.client.guilds.get(_this.guild).members.get(id)) _this.connection.query(`UPDATE \`users\` SET \`member\` = '0' WHERE \`users\`.\`id\` = '${id}'`, (err) => {if (err) throw err; next()});
+        //                     else next();
+        //                 },
+        //                 () => {
+        //                 }
+        //             )
+        //         });
+        // });
+
+
+
+        _this.registerCommands(() => {
+            console.info('Commands registered');
+            _this.registerEvents(() => {
+                console.info('Events registered');
+                _this.client.on('message', (message) => _this.onMessage(message));
+            })
         });
+
     }
     /**
      * @param {Object} message
      */
     onMessage(message) {
         let _this = this;
-        if (!message.content.startsWith(this.prefix)) return;
+        if (message.author.bot) return;
+        if (!message.content.startsWith(this.prefix)) {
+            new this.User(message.author.id, (data, cls) => {
+                if (!this.xpClaimed.has(message.author.id)) {
+                    cls.addXP();
+                } else {
+                    this.xpClaimed.add(message.author.id);
+                    setTimeout(() => {
+                        this.xpClaimed.delete(message.author.id);
+                    }, 6e4);
+                }
+            });
+            return;
+        }
         let args = message.content.slice(this.prefix.length).trim().split(/ +/g);
         let command = args.shift();
 
@@ -120,6 +147,7 @@ class Bot {
                                     mention_count++;
                                     if (!_this.Utilities.isMention(arg)) return err();
                                     args[num] = Object.values(message.mentions[`${arg_normal.type}s`].array())[mention_count - 1];
+                                    if (!args[num]) return err();
                                 }
                             }
                         }

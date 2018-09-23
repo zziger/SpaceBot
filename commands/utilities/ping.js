@@ -5,7 +5,7 @@ module.exports.info = {
     args: []
 };
 
-module.exports.run = function (message, command, args) {
+module.exports.run = function (message) {
     let embed = new Bot.Discord.RichEmbed()
         .setTitle('🏓 Понг!')
         .setDescription(`Пинг API сервера Discord - **${Math.round(Bot.client.ping)}**мс.`)
